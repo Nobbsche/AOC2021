@@ -14,33 +14,13 @@ fn read_input_to_vector ( input_path: &str ) -> Vec<i32> {
 
 fn check_depth ( depths : Vec<i32> ) -> i32
 { 
-    let mut current_value = depths[0];
-    let mut inc_counter = 0;
-
-    for i in 1..depths.len() {
-        if current_value < depths[i] {
-            inc_counter += 1;
-        }
-        current_value = depths[i];
-    }
-    inc_counter
+    depths.windows(2).filter(|x| x[0] <  x[1] ).count() as i32
 }
 
 fn check_depth_sliding_window ( depths : Vec<i32> ) -> i32
 { 
-
-    let mut inc_counter = 0;
-
     let counts: Vec<i32>= depths.windows(3).map(|x| x[0]+x[1]+x[2]).collect();
-    let mut current_value = counts[0];
-
-    for i in 1..counts.len() {
-        if current_value < counts[i] {
-            inc_counter += 1;
-        }
-        current_value = counts[i];
-    }
-    inc_counter
+    counts.windows(2).filter(|x| x[0] <  x[1] ).count() as i32
 }
 
 #[cfg(test)]
