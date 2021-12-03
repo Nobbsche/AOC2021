@@ -1,10 +1,8 @@
 //6:55
 
-use std::collections::HashMap;
 use std::fs;
 use std::env;
 use std::path::Path;
-use itertools::Itertools;
 
 #[derive(Debug)]
 pub struct Command {
@@ -12,59 +10,89 @@ pub struct Command {
     motion : i32,
 }
 
+pub trait Calculate {
+   fn calculate_motion (&mut self, command : &Command );
+   fn get_motion_result (&self) -> i32;
+}
+
+pub struct Motion {
+    depth : i32,
+    forward : i32,
+}
+
+impl Motion {
+    pub fn new () -> Self {
+        Motion {
+            depth: 0,
+            forward: 0,
+        }
+    }
+}
+
+impl Calculate for Motion {
+    fn calculate_motion (&mut self, command : &Command ) {
+        match command.command.as_str() {
+            "forward" => { self.forward += command.motion ;}
+            "up" => {self.depth -= command.motion;}
+            "down" => {self.depth += command.motion;}
+            _ => {panic!("unknown command");}
+        }
+    }
+
+    fn get_motion_result (&self) -> i32 {
+        self.depth * self.forward
+    }
+}
+
+pub struct AimMotion {
+    depth : i32,
+    forward : i32,
+    aim: i32,
+}
+
+impl AimMotion {
+    pub fn new () -> Self {
+        AimMotion {
+            depth: 0,
+            forward: 0,
+            aim: 0
+        }
+    }
+}
+
+impl Calculate for AimMotion {
+    fn calculate_motion (&mut self, command : &Command ) {
+        match command.command.as_str() {
+            "forward" => { self.forward += command.motion;
+                           self.depth += self.aim * command.motion; }
+            "up" => {self.aim -= command.motion;}
+            "down" => {self.aim += command.motion;}
+            _ => {panic!("unknown command");}
+        }
+    }
+
+    fn get_motion_result (&self) -> i32 {
+        self.depth * self.forward
+    }
+}
+
 static PATH : &str = "src/day2/input_day2.txt";
 
 fn read_input_to_map ( input_path: &str ) -> Vec<Command> {
     let cpath = env::current_dir().unwrap().join(Path::new(input_path));
-    let mut input_vec = vec![];
     match fs::read_to_string(cpath) {
         Ok (input) => { 
-                println!("input: {:?}", input);
-                for line in input.lines() {
-                    let t : Vec<&str> = line.split(' ').collect();
-                    input_vec.push( Command{ command: t[0].to_owned(), motion : t[1].to_string().parse().unwrap()} );
-                }   
+                input.lines().map(|l| { let t : Vec<&str> = l.split(' ').collect();
+                                        Command{ command: t[0].to_owned(), motion : t[1].to_string().parse().unwrap()} } )
+                             .collect()
         },
         Err (e) => {panic!("Could not parse input: {:?}", e);}
     }
-    println!("map: {:?}", input_vec);
-    input_vec
 }
 
-fn calculate_motion ( input_map : Vec<Command> ) -> i32 {
-    let mut depth = 0;
-    let mut forward = 0;
-    for c in input_map.iter() {
-        println!("k: {:?} - v : {:?}", c.command, c.motion);
-        match c.command.as_str() {
-            "forward" => { forward += c.motion ;}
-            "up" => {depth -= c.motion;}
-            "down" => {depth += c.motion;}
-            _ => {panic!("unknown command");}
-        }
-        println!("d: {:?} - f : {:?}", depth, forward);
-    }
-    println!("d: {:?} - f : {:?}", depth, forward);
-    depth*forward
-}
-
-fn calculate_motion_with_aim ( input_map : Vec<Command> ) -> i32 {
-    let mut depth = 0;
-    let mut forward = 0;
-    let mut aim = 0;
-    for c in input_map.iter() {
-        println!("k: {:?} - v : {:?}", c.command, c.motion);
-        match c.command.as_str() {
-            "forward" => { forward += c.motion;
-                           depth += aim * c.motion; }
-            "up" => {aim -= c.motion;}
-            "down" => {aim += c.motion;}
-            _ => {panic!("unknown command");}
-        }
-        println!("d: {:?} - f : {:?}", depth, forward);
-    }
-    println!("d: {:?} - f : {:?}", depth, forward);
-    depth*forward
+fn calculate_motion <T: Calculate> ( input_map : Vec<Command> , mut calc : T ) -> i32 {
+    let _v2: Vec<_> = input_map.iter().map(|c| calc.calculate_motion(c)).collect();
+    calc.get_motion_result()
 }
 
 #[cfg(test)]
@@ -87,7 +115,7 @@ mod tests {
         in_map.push(Command{ command: String::from("down"), motion : 8 });
         in_map.push(Command{ command: String::from("forward"), motion: 2});
 
-        assert_eq!(calculate_motion(in_map), 150)
+        assert_eq!(calculate_motion::<Motion>(in_map, Motion::new()), 150)
     }
 
     #[test]
@@ -100,18 +128,18 @@ mod tests {
         in_map.push(Command{ command: String::from("down"), motion : 8 });
         in_map.push(Command{ command: String::from("forward"), motion: 2});
 
-        assert_eq!(calculate_motion_with_aim(in_map), 900)
+        assert_eq!(calculate_motion::<AimMotion>(in_map, AimMotion::new()), 900)
     }
     
     #[test]
     fn riddle_1() {
         let depths = read_input_to_map(PATH);
-        assert_eq!(calculate_motion(depths), 2036120);
+        assert_eq!(calculate_motion::<Motion>(depths, Motion::new()), 2036120);
     }
-
+    
     #[test]
     fn riddle_2() {
         let depths = read_input_to_map(PATH);
-        assert_eq!(calculate_motion_with_aim(depths), 2015547716);
+        assert_eq!(calculate_motion::<AimMotion>(depths, AimMotion::new()), 2015547716);
     }
 }
