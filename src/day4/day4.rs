@@ -193,6 +193,6 @@ mod tests {
     fn riddle_2() {
         let boards = read_input_to_board("src/day4/input_day4_boards.txt");
         let draw = read_input_to_draw("src/day4/input_day4_draw.txt");
-        assert_eq!( let_the_squid_win(boards, draw ).last().unwrap().clone(), 1924); 
+        assert_eq!( let_the_squid_win(boards, draw ).last().unwrap().clone(), 1830); 
     }
 }
