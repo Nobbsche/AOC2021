@@ -62,16 +62,13 @@ fn read_input_to_vector ( input_path: &str ) -> Vec<Instruction> {
 
 fn count_vents_intersection ( inst : Vec<Instruction>, size : (usize, usize) ) -> i32 {
     let mut array = Array2::<i32,>::zeros((size.0, size.1));
-    println!{"{:?}", array};
     let mut counter = 0;
     for i in inst {
-        println!{"{:?}", i};
         if i.is_row() {
             let x1;
             let x2;
             if i.x1 > i.x2 { x1 = i.x2; x2 = i.x1 } else { x1 = i.x1; x2 = i.x2};
             array.slice_mut(s![i.y1, x1..x2+1 ]).map_inplace(|e| *e += 1);
-            println!("inst row: {} - {} , {} - {}", x1, i.y1, x2+1, i.y2);
         }
         else if i.is_column()
         {
@@ -79,7 +76,6 @@ fn count_vents_intersection ( inst : Vec<Instruction>, size : (usize, usize) ) -
             let y2;
             if i.y1 > i.y2 { y1 = i.y2; y2 = i.y1 } else { y1 = i.y1; y2 = i.y2};
             array.slice_mut(s![y1..y2+1, i.x1 ]).map_inplace(|e| *e += 1);
-            println!("inst col: {} - {} , {} - {}", i.x1, i.x2, y1, y2+1);
         }
     }
     for ((x,y),value) in array.indexed_iter_mut()  {
@@ -95,13 +91,11 @@ fn count_vents_intersection_diagonal ( inst : Vec<Instruction>, size : (usize, u
     //println!{"{:?}", array};
     let mut counter = 0;
     for i in inst {
-        println!{"{:?}", i};
         if i.is_row() {
             let x1;
             let x2;
             if i.x1 > i.x2 { x1 = i.x2; x2 = i.x1 } else { x1 = i.x1; x2 = i.x2};
             array.slice_mut(s![i.y1, x1..x2+1 ]).map_inplace(|e| *e += 1);
-            println!("inst row: {} - {} , {} - {}", x1, i.y1, x2+1, i.y2);
         }
         else if i.is_column()
         {
@@ -109,11 +103,9 @@ fn count_vents_intersection_diagonal ( inst : Vec<Instruction>, size : (usize, u
             let y2;
             if i.y1 > i.y2 { y1 = i.y2; y2 = i.y1 } else { y1 = i.y1; y2 = i.y2};
             array.slice_mut(s![y1..y2+1, i.x1 ]).map_inplace(|e| *e += 1);
-            println!("inst col: {} - {} , {} - {}", i.x1, i.x2, y1, y2+1);
         }
         else{
             let m = (i.x2 as i32 - i.x1 as i32) / (i.y1 as i32 - i.y2 as i32);
-            //println!("m: {:?}", m);
             let x1;
             let x2;
             if i.x1 > i.x2 { x1 = i.x2; x2 = i.x1 } else { x1 = i.x1; x2 = i.x2};
@@ -122,37 +114,22 @@ fn count_vents_intersection_diagonal ( inst : Vec<Instruction>, size : (usize, u
             if i.y1 > i.y2 { y1 = i.y2; y2 = i.y1 } else { y1 = i.y1; y2 = i.y2};
             let ys = (x2 as i32 - x1 as i32).abs() as i32;
             if m > 0 {
-                //println!("m+ inst: {:?}", i);
-                //println!("x1: {}, x2 : {} - y1: {} - y2: {}", x1, x2+1, y1, y2+1);
                 let mut slice = array.slice_mut(s![y1..y2+1, x1..x2+1]);
-                //println!("slice: {:?}", slice);
                 for ((x,y),value) in slice.indexed_iter_mut()  {
-                    //println!("con: {} - {} ", y as i32- ys , x);
                     if (y as i32 - ys).abs() == x as i32 {
                         *value += 1;
-                        //println!("mark inst: {:?} - x: {} - y: {}", i, x, y);
                     } 
                 }
             } else {
-                //println!("m+ inst: {:?}", i);
-                //println!("x1: {}, x2 : {} - y1: {} - y2: {}", x1, x2, y1, y2);
                 let mut slice = array.slice_mut(s![y1..y2+1, x1..x2+1 ]);
-                //println!("slice: {:?}", slice);
                 for ((x,y),value) in slice.indexed_iter_mut()  {
-                    //println!("con: {} - {} ", y as i32- ys , x);
                     if (y as i32).abs() == x as i32 {
                         *value += 1;
-                        //println!("mark inst: {:?} - x: {} - y: {}", i, x, y);
                     } 
                 }
             } 
-            //println!("inst: {} - {} , {} - {} -> \n {:?}", i.x1, i.y1, i.x2, i.y2, slice);
-        }
-        println!{"\n{:?}\n", array};
-        //println!("inst: {} - {} , {} - {} ", i.x1, i.y1, i.x2, i.y2  );
-        
+        }  
     }
-    println!("\n{:?}\n",array);
     for ((x,y),value) in array.indexed_iter_mut()  {
         if value > &mut 1 {
             counter += 1;
