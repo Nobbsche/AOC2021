@@ -175,6 +175,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
     fn riddle_2 () {
         let inst = read_input_to_vector("src/day5/input_day5.txt");
         assert_eq!(count_vents_intersection_diagonal(inst, (999,999)), 18423)
