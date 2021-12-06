@@ -127,7 +127,7 @@ fn count_vents_intersection_diagonal ( inst : Vec<Instruction>, size : (usize, u
                         *value += 1;
                     } 
                 }
-            } 
+            }
         }  
     }
     for ((x,y),value) in array.indexed_iter_mut()  {
@@ -137,7 +137,6 @@ fn count_vents_intersection_diagonal ( inst : Vec<Instruction>, size : (usize, u
     }
     counter
 }
-
 
 #[cfg(test)]
 mod tests {
