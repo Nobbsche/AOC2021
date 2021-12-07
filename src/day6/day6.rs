@@ -91,7 +91,7 @@ mod tests {
     #[test]
     fn riddle_2() {
         let fish = read_input_to_vector(PATH);
-        assert_eq!(fish_growth_model(fish, 256), 26984457539);
+        assert_eq!(fish_growth_model(fish, 256), 1702631502303);
     }
 
 }
