@@ -77,6 +77,6 @@ mod tests {
     #[test]
     fn riddle_2() {
         let subs = read_input_to_vector(PATH);
-        assert_eq!(fuel_calculation_increase(subs), 343605); 
+        assert_eq!(fuel_calculation_increase(subs), 96744904); 
     }
 }
