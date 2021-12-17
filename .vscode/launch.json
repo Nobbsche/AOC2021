@@ -5,7 +5,7 @@
             "name": "(Windows) Launch",
             "type": "cppvsdbg",
             "request": "launch",
-            "program": "${workspaceRoot}/target/debug/deps/day1-48e5b95d6a8da1f0.exe",
+            "program": "${workspaceRoot}/target/debug/deps/day1-3f6079fcdd1bd52f.exe",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceRoot}",
