@@ -10,7 +10,7 @@ use std::collections::BinaryHeap;
 use std::usize;
 
 use ndarray::prelude::*;
-use ndarray::Array;
+use ndarray::{Array, Axis, concatenate};
 
 fn read_input_to_array ( input_path: &str, dim : (usize, usize) ) -> Array2::<u32,> {
     let mut a = Array2::<u32,>::zeros((dim.0, dim.1));
@@ -121,7 +121,6 @@ impl Grid {
                     heap.push(next);
                 }
             }
-            //println!("node: {:?} - cost: {:?}", node, cost);
         }
         None
     }
@@ -157,33 +156,49 @@ fn create_path ( array : Array2::<u32,>) -> u32 {
         if let Some (edge) = generate_edge( &array, (ikey.0-1, ikey.1), &node_map, *key ) { edge_vec.push(edge)};
         if let Some (edge) = generate_edge( &array, (ikey.0, ikey.1+1), &node_map, *key ) { edge_vec.push(edge)};
         if let Some (edge) = generate_edge( &array, (ikey.0, ikey.1-1), &node_map, *key ) { edge_vec.push(edge)};
-        println!("edges: {:?}", edge_vec);
         grid.create_edges(&edge_vec);
     }
 
-    println!("start path");
     let shape = array.shape();
     let start = node_map.get(&(0,0)).unwrap();
     let end   = node_map.get(&(shape[0]-1, shape[1]-1)).unwrap();
     let (path, cost) = grid.find_path(*start, *end).unwrap();
  
     let mut sum = 0;
-    print!("{:?}", grid.nodes[path[0]].data);
     for i in path.iter().skip(1) {
         let point = grid.nodes[*i].clone();
         let value = array[[point.data.0, point.data.1]];
         sum += value;
         //print!(" -> {:?} - {:?}", grid.nodes[*i].data, value);
     }
-    println!("\nCost: {} - sum: {:?}", cost, sum);
-    println!("\n{:?}\n", array);
     cost
+}
+
+fn expand_array( array : Array2::<u32,> ) -> Array2::<u32,> {
+    let mut a = array.clone();
+    let mut b = array.clone();
+
+    for _i in 0..4 {
+        b = &b + 1; 
+        b.mapv_inplace(|x| if x > 9 { 1 } else { x });
+        a = concatenate![Axis(0), a, b];   
+    }
+
+    b = a.clone();
+     
+    for _i in 0..4 {
+        b = &b + 1; 
+        b.mapv_inplace(|x| if x > 9 { 1 } else { x });
+        a = concatenate![Axis(1), a, b];   
+    }
+    a
 }
 
 #[cfg(test)]
 mod tests {
     static PATH : &str = "src/day15/input_day15.txt";
     static TESTPATH : &str = "src/day15/test_day15.txt";
+    static EXPANDPATH : &str = "src/day15/test_expand_day15.txt";
 
     use super::*;
 
@@ -201,8 +216,43 @@ mod tests {
     }
 
     #[test]
+    fn expand_simple_array_test() {
+        let array = Array::<u32, _>::from_elem((1,1),8);
+        let new_array = expand_array(array);
+        let expanded_array = array![[8, 9, 1, 2, 3]
+                                  , [9, 1, 2, 3, 4]
+                                  , [1, 2, 3, 4, 5]
+                                  , [2, 3, 4, 5, 6]
+                                  , [3, 4, 5, 6, 7]]; 
+        assert_eq!(new_array, expanded_array);
+    }
+
+    #[test]
+    fn expand_array_test() {
+        let array = read_input_to_array(TESTPATH, (10,10));
+        let result = read_input_to_array(EXPANDPATH, (50,50));
+        let expanded_array = expand_array(array);
+        assert_eq!(expanded_array, result);
+    }
+
+    #[test]
+    fn low_risk_path_expaned() {
+        let array = read_input_to_array(TESTPATH, (10,10));
+        let expanded_array = expand_array(array);
+        assert_eq!( create_path (expanded_array), 315);
+    }
+
+    #[test]
     fn riddle_1() {
         let array = read_input_to_array(PATH, (100,100));
         assert_eq!( create_path (array), 824);
     }
+
+    #[test]
+    fn riddle_2() {
+        let array = read_input_to_array(PATH, (100,100));
+        let expanded_array = expand_array(array);
+        assert_eq!( create_path (expanded_array), 3063);
+    }
+
 }
